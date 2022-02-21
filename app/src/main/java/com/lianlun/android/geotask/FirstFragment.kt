@@ -56,10 +56,7 @@ class FirstFragment : Fragment(), OnMapReadyCallback {
     private val DEFAULT_ZOOM = 15f
     private val TAG = "FirstFragment"
     private var mLocationPermissionGranted = false
-    //autocomplete
-    private val AUTOCOMPLETE_REQUEST_CODE = 1
-    private val fields = listOf(com.google.android.libraries.places.api.model.Place.Field.ID,
-    com.google.android.libraries.places.api.model.Place.Field.NAME)
+
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -109,10 +106,6 @@ class FirstFragment : Fragment(), OnMapReadyCallback {
     private fun init(){
         Log.d(TAG, "init: initialising")
 
-        val intent = Autocomplete.IntentBuilder(AutocompleteActivityMode.OVERLAY, fields)
-            .build(mContext)
-        startActivityForResult(intent, AUTOCOMPLETE_REQUEST_CODE)
-
         from_inputSearch.setOnEditorActionListener { textView, actionId, keyEvent ->
             if (actionId == EditorInfo.IME_ACTION_SEARCH
                 || actionId == EditorInfo.IME_ACTION_DONE
@@ -129,30 +122,6 @@ class FirstFragment : Fragment(), OnMapReadyCallback {
             getDeviceLocation()
         })
         hideSoftKeyboard()
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        if(requestCode == AUTOCOMPLETE_REQUEST_CODE){
-            when(resultCode){
-                Activity.RESULT_OK -> {
-                    data?.let {
-                        val place = Autocomplete.getPlaceFromIntent(data)
-                        Log.i(TAG, "onActivityResult: Place ${place.name}, ${place.id}")
-                    }
-                }
-                AutocompleteActivity.RESULT_ERROR -> {
-                    data?.let {
-                        val status = Autocomplete.getStatusFromIntent(data)
-                        Log.i(TAG, "onActivityResult: " + status.statusMessage)
-                    }
-                }
-                Activity.RESULT_CANCELED -> {
-                    //the user canceled the operation
-                }
-            }
-            return
-        }
-        super.onActivityResult(requestCode, resultCode, data)
     }
 
     private fun getLocationPermission(){
