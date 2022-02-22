@@ -2,6 +2,7 @@ package com.lianlun.android.geotask
 
 import android.Manifest
 import android.app.Activity
+import android.app.Activity.RESULT_OK
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -19,7 +20,6 @@ import android.widget.TextView.OnEditorActionListener
 import androidx.annotation.NonNull
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.room.vo.Field
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.LocationServices.getFusedLocationProviderClient
@@ -32,6 +32,7 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.android.gms.tasks.Task
+import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.widget.Autocomplete
 import com.google.android.libraries.places.widget.AutocompleteActivity
 import com.google.android.libraries.places.widget.model.AutocompleteActivityMode
@@ -39,9 +40,15 @@ import com.lianlun.android.geotask.R.id.from_inputSearch
 import com.lianlun.android.geotask.R.layout.fragment_first
 import kotlinx.android.synthetic.main.fragment_first.*
 import java.io.IOException
-import java.util.ArrayList
 import java.util.concurrent.Executor
 import kotlin.math.log
+import androidx.core.app.ActivityCompat.startActivityForResult
+import com.google.android.gms.common.api.Status
+import com.google.android.libraries.places.widget.AutocompleteSupportFragment
+import com.google.android.libraries.places.widget.listener.PlaceSelectionListener
+import java.util.*
+import com.google.android.libraries.places.api.model.Place as Place1
+
 
 class FirstFragment : Fragment(), OnMapReadyCallback {
 
@@ -56,6 +63,8 @@ class FirstFragment : Fragment(), OnMapReadyCallback {
     private val DEFAULT_ZOOM = 15f
     private val TAG = "FirstFragment"
     private var mLocationPermissionGranted = false
+    private val apiKey = "AIzaSyDlOstWPMsbOA11AuKkt6bm6RlaFZFa-YU"
+    private lateinit var searchString: String
 
 
     override fun onAttach(context: Context) {
@@ -71,6 +80,10 @@ class FirstFragment : Fragment(), OnMapReadyCallback {
         val view = inflater.inflate(fragment_first, container, false)
 
         getLocationPermission()
+
+        if(!Places.isInitialized()){
+            Places.initialize(mContext, apiKey)
+        }
 
         return view
     }
@@ -106,17 +119,26 @@ class FirstFragment : Fragment(), OnMapReadyCallback {
     private fun init(){
         Log.d(TAG, "init: initialising")
 
-        from_inputSearch.setOnEditorActionListener { textView, actionId, keyEvent ->
-            if (actionId == EditorInfo.IME_ACTION_SEARCH
-                || actionId == EditorInfo.IME_ACTION_DONE
-                || keyEvent.action == KeyEvent.ACTION_DOWN
-                || keyEvent.action == KeyEvent.KEYCODE_ENTER
-            ) {
-                //execute our method for searching
+        var autocompleteFragment = childFragmentManager
+            .findFragmentById(R.id.from_inputSearch) as AutocompleteSupportFragment
+
+        autocompleteFragment.setPlaceFields(listOf(Place1.Field.ID,
+            Place1.Field.NAME,
+            Place1.Field.ADDRESS))
+
+        autocompleteFragment.setOnPlaceSelectedListener(object : PlaceSelectionListener {
+            override fun onPlaceSelected(place: Place1) {
+                // TODO: Get info about the selected place.
+                searchString = place.name
                 geoLocate()
+                Log.i(TAG, "Place: " + place.name + ", " + place.id)
             }
-            false
-        }
+            override fun onError(status: Status) {
+                // TODO: Handle the error.
+                Log.i(TAG, "An error occurred: $status")
+            }
+        })
+
         ic_gps.setOnClickListener(View.OnClickListener {
             Log.d(TAG, "onClick: clicked gps icon")
             getDeviceLocation()
@@ -151,7 +173,9 @@ class FirstFragment : Fragment(), OnMapReadyCallback {
     private fun geoLocate(){
         Log.d(TAG, "geoLocate: geolocating")
 
-        var searchString = from_inputSearch.text.toString()
+//        if (searchString == null){
+//            searchString = from_inputSearch.text.toString()
+//        }
 
         var geocoder = Geocoder(mContext)
         var list: List<Address> = ArrayList()
