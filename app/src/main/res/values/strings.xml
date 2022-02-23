@@ -1,7 +1,5 @@
 <resources>
     <string name="app_name">Geo Task</string>
     <string name="title_activity_maps">Geo Task</string>
-    <string name="from_tab_header">Откуда</string>
-    <string name="to_tab_header">Куда</string>
     <string name="search_btn_text">Поиск</string>
 </resources>

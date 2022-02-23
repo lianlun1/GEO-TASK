@@ -2,47 +2,31 @@ package com.lianlun.android.geotask
 
 import android.Manifest
 import android.app.Activity
-import android.app.Activity.RESULT_OK
 import android.content.Context
-import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Address
 import android.location.Geocoder
 import android.location.Location
-import android.location.LocationManager
 import android.os.Bundle
 import android.util.Log
 import android.view.*
 import androidx.fragment.app.Fragment
-import android.view.inputmethod.EditorInfo
 import android.widget.*
-import android.widget.TextView.OnEditorActionListener
-import androidx.annotation.NonNull
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.LocationServices.getFusedLocationProviderClient
-import com.google.android.gms.location.places.Place
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
-import com.google.android.gms.tasks.OnCompleteListener
 import com.google.android.gms.tasks.Task
 import com.google.android.libraries.places.api.Places
-import com.google.android.libraries.places.widget.Autocomplete
-import com.google.android.libraries.places.widget.AutocompleteActivity
-import com.google.android.libraries.places.widget.model.AutocompleteActivityMode
-import com.lianlun.android.geotask.R.id.from_inputSearch
 import com.lianlun.android.geotask.R.layout.fragment_first
 import kotlinx.android.synthetic.main.fragment_first.*
 import java.io.IOException
-import java.util.concurrent.Executor
-import kotlin.math.log
-import androidx.core.app.ActivityCompat.startActivityForResult
 import com.google.android.gms.common.api.Status
 import com.google.android.libraries.places.widget.AutocompleteSupportFragment
 import com.google.android.libraries.places.widget.listener.PlaceSelectionListener
@@ -63,9 +47,7 @@ class FirstFragment : Fragment(), OnMapReadyCallback {
     private val DEFAULT_ZOOM = 15f
     private val TAG = "FirstFragment"
     private var mLocationPermissionGranted = false
-    private val apiKey = "AIzaSyDlOstWPMsbOA11AuKkt6bm6RlaFZFa-YU"
     private lateinit var searchString: String
-
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -80,6 +62,8 @@ class FirstFragment : Fragment(), OnMapReadyCallback {
         val view = inflater.inflate(fragment_first, container, false)
 
         getLocationPermission()
+
+        val apiKey = mContext.getString(R.string.google_maps_key)
 
         if(!Places.isInitialized()){
             Places.initialize(mContext, apiKey)
