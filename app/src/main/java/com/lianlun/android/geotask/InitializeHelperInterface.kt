@@ -1,37 +1,26 @@
 package com.lianlun.android.geotask
 
-import android.app.Activity
 import android.content.Context
 import android.location.Address
 import android.location.Geocoder
-import android.location.Location
 import android.text.Editable
 import android.text.SpannableString
 import android.text.TextWatcher
-import android.util.Log
 import android.view.KeyEvent
 import android.view.View
-import android.view.WindowManager
 import android.view.inputmethod.EditorInfo
 import android.widget.*
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationServices
-import com.google.android.gms.maps.CameraUpdateFactory
-import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.MarkerOptions
-import com.google.android.gms.tasks.Task
 import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.api.model.AutocompleteSessionToken
 import com.google.android.libraries.places.api.model.TypeFilter
 import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRequest
 import com.google.android.libraries.places.api.net.FindAutocompletePredictionsResponse
 import com.google.android.libraries.places.api.net.PlacesClient
-import kotlinx.android.synthetic.main.fragment_first.*
 import java.io.IOException
 import java.lang.Exception
-import java.lang.StringBuilder
 import java.util.*
 
 interface InitializeHelperInterface {

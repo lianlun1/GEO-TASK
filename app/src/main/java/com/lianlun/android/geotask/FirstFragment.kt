@@ -37,9 +37,7 @@ class FirstFragment : Fragment(), OnMapReadyCallback, InitializeHelperInterface 
     private val LOCATION_PERMISSION_REQUEST_CODE = 1234
     override lateinit var mFusedLocationProviderClient: FusedLocationProviderClient
     private val DEFAULT_ZOOM = 15f
-    private val TAG = "FirstFragment"
     private var mLocationPermissionGranted = false
-    private lateinit var enteredText: String
     override lateinit var placesClient: PlacesClient
 
     override fun onAttach(context: Context) {
@@ -61,12 +59,12 @@ class FirstFragment : Fragment(), OnMapReadyCallback, InitializeHelperInterface 
         if (!Places.isInitialized()){
             Places.initialize(mContext, apiKey)
         }
+
         return view
     }
 
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
-        Toast.makeText(mContext, "Map is ready", Toast.LENGTH_SHORT).show()
 
         if(mLocationPermissionGranted){
             getDeviceLocation()
@@ -82,7 +80,7 @@ class FirstFragment : Fragment(), OnMapReadyCallback, InitializeHelperInterface 
 
             placesClient = Places.createClient(mContext)
 
-            init(from_input_search, mContext, ic_gps, DEFAULT_ZOOM)
+            init(from_input_search, mContext, ic1_gps, DEFAULT_ZOOM)
         }
     }
 
