@@ -17,17 +17,25 @@
         android:elevation="10dp"
         android:background="@drawable/white_border"
         android:id="@+id/relLayout1">
-        <androidx.fragment.app.FragmentContainerView
+        <ImageView
+            android:layout_width="15dp"
+            android:layout_height="15dp"
+            android:id="@+id/ic_magnify"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="10dp"
+            android:src="@drawable/ic_magnify"/>
+        <AutoCompleteTextView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:layout_toRightOf="@+id/ic_magnify"
             android:layout_centerVertical="true"
             android:textSize="15sp"
             android:textColor="@color/black"
-            android:id="@+id/from_inputSearch"
+            android:id="@+id/from_input_search"
             android:background="@null"
             android:hint="Enter address, City or Zip code"
             android:imeOptions="actionSearch"
-            android:name="com.google.android.libraries.places.widget.AutocompleteSupportFragment"/>
+            android:completionThreshold="3"/>
     </RelativeLayout>
     <ImageView
         android:layout_width="40dp"

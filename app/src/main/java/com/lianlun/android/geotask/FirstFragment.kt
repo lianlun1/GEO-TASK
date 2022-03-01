@@ -10,8 +10,10 @@ import android.location.Location
 import android.os.Bundle
 import android.util.Log
 import android.view.*
+import android.view.inputmethod.EditorInfo
 import androidx.fragment.app.Fragment
 import android.widget.*
+import android.widget.TextView.OnEditorActionListener
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -23,16 +25,23 @@ import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.gms.tasks.Task
-import com.google.android.libraries.places.api.Places
 import com.lianlun.android.geotask.R.layout.fragment_first
 import kotlinx.android.synthetic.main.fragment_first.*
 import java.io.IOException
-import com.google.android.gms.common.api.Status
-import com.google.android.libraries.places.widget.AutocompleteSupportFragment
-import com.google.android.libraries.places.widget.listener.PlaceSelectionListener
 import java.util.*
-import com.google.android.libraries.places.api.model.Place as Place1
+import android.text.Editable
+import android.text.SpannableString
 
+import android.text.TextWatcher
+import com.google.android.gms.common.api.ApiException
+import com.google.android.libraries.places.api.Places
+import com.google.android.libraries.places.api.model.AutocompleteSessionToken
+import com.google.android.libraries.places.api.model.TypeFilter
+import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRequest
+import com.google.android.libraries.places.api.net.FindAutocompletePredictionsResponse
+import com.google.android.libraries.places.api.net.PlacesClient
+import java.lang.Exception
+import java.lang.StringBuilder
 
 class FirstFragment : Fragment(), OnMapReadyCallback {
 
@@ -47,7 +56,8 @@ class FirstFragment : Fragment(), OnMapReadyCallback {
     private val DEFAULT_ZOOM = 15f
     private val TAG = "FirstFragment"
     private var mLocationPermissionGranted = false
-    private lateinit var searchString: String
+    private lateinit var enteredText: String
+    private lateinit var placesClient: PlacesClient
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -65,10 +75,9 @@ class FirstFragment : Fragment(), OnMapReadyCallback {
 
         val apiKey = mContext.getString(R.string.google_maps_key)
 
-        if(!Places.isInitialized()){
+        if (!Places.isInitialized()){
             Places.initialize(mContext, apiKey)
         }
-
         return view
     }
 
@@ -103,24 +112,31 @@ class FirstFragment : Fragment(), OnMapReadyCallback {
     private fun init(){
         Log.d(TAG, "init: initialising")
 
-        var autocompleteFragment = childFragmentManager
-            .findFragmentById(R.id.from_inputSearch) as AutocompleteSupportFragment
+        placesClient = Places.createClient(mContext)
 
-        autocompleteFragment.setPlaceFields(listOf(Place1.Field.ID,
-            Place1.Field.NAME,
-            Place1.Field.ADDRESS))
+        from_input_search.addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(s: Editable) {
+                if(s.length > 2) {
+                    enteredText = s.toString()
+                    autocompleteHelper()
+                    Log.d(TAG, "onTextChanged: передача $enteredText")
+                }
+            }
 
-        autocompleteFragment.setOnPlaceSelectedListener(object : PlaceSelectionListener {
-            override fun onPlaceSelected(place: Place1) {
-                // TODO: Get info about the selected place.
-                searchString = place.name
+            override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {}
+        })
+
+        from_input_search.setOnEditorActionListener(OnEditorActionListener {
+                textView, actionId, keyEvent ->
+            if (actionId == EditorInfo.IME_ACTION_SEARCH
+                || actionId == EditorInfo.IME_ACTION_DONE
+                || keyEvent.action == KeyEvent.ACTION_DOWN
+                || keyEvent.action == KeyEvent.KEYCODE_ENTER) {
+
                 geoLocate()
-                Log.i(TAG, "Place: " + place.name + ", " + place.id)
             }
-            override fun onError(status: Status) {
-                // TODO: Handle the error.
-                Log.i(TAG, "An error occurred: $status")
-            }
+            false
         })
 
         ic_gps.setOnClickListener(View.OnClickListener {
@@ -128,6 +144,43 @@ class FirstFragment : Fragment(), OnMapReadyCallback {
             getDeviceLocation()
         })
         hideSoftKeyboard()
+    }
+
+    private fun autocompleteHelper(){
+        var places = emptyArray<SpannableString>()
+
+        var token: AutocompleteSessionToken = AutocompleteSessionToken.newInstance()
+        var request: FindAutocompletePredictionsRequest = FindAutocompletePredictionsRequest
+            .builder()
+            .setTypeFilter(TypeFilter.ADDRESS)
+            .setSessionToken(token)
+            .setQuery(from_input_search.text.toString())
+            .build()
+
+        placesClient.findAutocompletePredictions(request)
+            .addOnSuccessListener { response: FindAutocompletePredictionsResponse ->
+                var mResult = StringBuilder()
+                for(prediction in response.autocompletePredictions){
+                    mResult.append(" ").append(prediction.getFullText(null))
+                    places += prediction.getPrimaryText(null)
+                    Log.d(TAG, "autocompleteHelper: ID: ${prediction.placeId}")
+                    Log.d(TAG, "autocompleteHelper: Место: ${prediction
+                        .getPrimaryText(null)}")
+                }
+                for(place in places.indices){
+                    Log.d(TAG, "autocompleteHelper: Places: ${places[place]}")
+                }
+
+                var adapter = ArrayAdapter<SpannableString>(
+                    mContext, R.layout.support_simple_spinner_dropdown_item, places)
+                from_input_search.setAdapter(adapter)
+
+                geoLocate()
+            }.addOnFailureListener {exception: Exception? ->
+                if (exception is ApiException){
+                    Log.e(TAG, "autocompleteHelper: PlaceNotFound: ${exception.statusCode}")
+                }
+            }
     }
 
     private fun getLocationPermission(){
@@ -157,9 +210,7 @@ class FirstFragment : Fragment(), OnMapReadyCallback {
     private fun geoLocate(){
         Log.d(TAG, "geoLocate: geolocating")
 
-//        if (searchString == null){
-//            searchString = from_inputSearch.text.toString()
-//        }
+        var searchString = from_input_search.text.toString()
 
         var geocoder = Geocoder(mContext)
         var list: List<Address> = ArrayList()
@@ -241,7 +292,7 @@ class FirstFragment : Fragment(), OnMapReadyCallback {
                     }
                     Log.d(TAG, "onRequestPermissionsResult: permission granted")
                     mLocationPermissionGranted = true
-                    //initialise our map
+
                     initMap()
                 }
             }
