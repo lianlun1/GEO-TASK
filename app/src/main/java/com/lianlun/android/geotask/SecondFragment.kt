@@ -3,6 +3,7 @@ package com.lianlun.android.geotask
 import android.Manifest
 import android.app.Activity
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Bundle
@@ -11,6 +12,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
+import android.widget.ImageView
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -26,8 +28,15 @@ import com.google.android.gms.tasks.Task
 import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.api.net.PlacesClient
 import kotlinx.android.synthetic.main.fragment_second.*
+import java.lang.ClassCastException
 
 class SecondFragment : Fragment(), OnMapReadyCallback, InitializeHelperInterface {
+
+//    interface OnSendLatLngToListener{
+//        fun onSendLatLngTo(latLng: LatLng)
+//    }
+
+    private lateinit var sendLatLngToListener: OnSendLatLngListener
 
     private lateinit var mMap: GoogleMap
 
@@ -40,10 +49,18 @@ class SecondFragment : Fragment(), OnMapReadyCallback, InitializeHelperInterface
     private val DEFAULT_ZOOM = 15f
     private var mLocationPermissionGranted = false
     override lateinit var placesClient: PlacesClient
+    private lateinit var mRoute: ImageView
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
         mContext = context
+
+        try {
+            sendLatLngToListener = context as OnSendLatLngListener
+        } catch (e: ClassCastException){
+            throw ClassCastException(
+                "$context должен реализовывать интерфейс OnSendLatLngToListener")
+        }
     }
 
     override fun onCreateView(
@@ -139,6 +156,8 @@ class SecondFragment : Fragment(), OnMapReadyCallback, InitializeHelperInterface
     }
 
     override fun moveCamera(latLng: LatLng, zoom: Float, title: String){
+
+        sendLatLngToListener.onSendLatLngTo(latLng)
 
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, zoom))
 

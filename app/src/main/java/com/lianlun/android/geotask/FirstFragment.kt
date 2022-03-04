@@ -25,8 +25,16 @@ import com.lianlun.android.geotask.R.layout.fragment_first
 import kotlinx.android.synthetic.main.fragment_first.*
 import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.api.net.PlacesClient
+import java.lang.ClassCastException
+import kotlin.math.log
 
 class FirstFragment : Fragment(), OnMapReadyCallback, InitializeHelperInterface {
+
+//    interface OnSendLatLngFromListener{
+//        fun onSendLatLngFrom(latLng: LatLng)
+//    }
+
+    private lateinit var sendLatLngFromListener: OnSendLatLngListener
 
     private lateinit var mMap: GoogleMap
 
@@ -39,10 +47,18 @@ class FirstFragment : Fragment(), OnMapReadyCallback, InitializeHelperInterface 
     private val DEFAULT_ZOOM = 15f
     private var mLocationPermissionGranted = false
     override lateinit var placesClient: PlacesClient
+    private val TAG = "FirstActivity"
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
         mContext = context
+
+        try {
+            sendLatLngFromListener = context as OnSendLatLngListener
+        } catch (e: ClassCastException){
+            throw ClassCastException(
+                "$context должен реализовывать интерфейс OnSendLatLngFromListener")
+        }
     }
 
     override fun onCreateView(
@@ -136,6 +152,9 @@ class FirstFragment : Fragment(), OnMapReadyCallback, InitializeHelperInterface 
     }
 
     override fun moveCamera(latLng: LatLng, zoom: Float, title: String){
+
+        sendLatLngFromListener.onSendLatLngFrom(latLng)
+        Log.d(TAG, "moveCamera: Передача ${latLng.latitude} + ${latLng.longitude}")
 
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, zoom))
 

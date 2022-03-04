@@ -37,14 +37,15 @@ android:id="@+id/relLayout1">
     android:imeOptions="actionSearch"
     android:completionThreshold="3"/>
 </RelativeLayout>
-<ImageView
-android:layout_width="40dp"
-android:layout_height="40dp"
-android:layout_below="@id/relLayout1"
-android:layout_alignParentRight="true"
-android:layout_marginRight="10dp"
-android:layout_marginTop="10dp"
-android:scaleType="centerCrop"
-android:id="@+id/ic2_gps"
-android:src="@drawable/ic_gps"/>
+
+    <ImageView
+        android:id="@+id/ic2_gps"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_below="@id/relLayout1"
+        android:layout_alignParentRight="true"
+        android:layout_marginTop="10dp"
+        android:layout_marginRight="10dp"
+        android:scaleType="centerCrop"
+        android:src="@drawable/ic_gps" />
     </RelativeLayout>
