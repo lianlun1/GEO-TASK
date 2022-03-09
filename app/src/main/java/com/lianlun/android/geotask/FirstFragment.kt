@@ -13,6 +13,7 @@ import android.widget.*
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.LocationServices.getFusedLocationProviderClient
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
@@ -25,14 +26,11 @@ import com.lianlun.android.geotask.R.layout.fragment_first
 import kotlinx.android.synthetic.main.fragment_first.*
 import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.api.net.PlacesClient
+import kotlinx.android.synthetic.main.fragment_second.*
 import java.lang.ClassCastException
 import kotlin.math.log
 
 class FirstFragment : Fragment(), OnMapReadyCallback, InitializeHelperInterface {
-
-//    interface OnSendLatLngFromListener{
-//        fun onSendLatLngFrom(latLng: LatLng)
-//    }
 
     private lateinit var sendLatLngFromListener: OnSendLatLngListener
 
@@ -47,7 +45,7 @@ class FirstFragment : Fragment(), OnMapReadyCallback, InitializeHelperInterface 
     private val DEFAULT_ZOOM = 15f
     private var mLocationPermissionGranted = false
     override lateinit var placesClient: PlacesClient
-    private val TAG = "FirstActivity"
+    private val TAG = "FirstFragment"
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -57,7 +55,7 @@ class FirstFragment : Fragment(), OnMapReadyCallback, InitializeHelperInterface 
             sendLatLngFromListener = context as OnSendLatLngListener
         } catch (e: ClassCastException){
             throw ClassCastException(
-                "$context должен реализовывать интерфейс OnSendLatLngFromListener")
+                "$context должен реализовывать интерфейс OnSendLatLngToListener")
         }
     }
 
@@ -76,19 +74,23 @@ class FirstFragment : Fragment(), OnMapReadyCallback, InitializeHelperInterface 
             Places.initialize(mContext, apiKey)
         }
 
+        Log.d(TAG, "onCreateView: apiKey: $apiKey")
+
         return view
     }
 
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
 
+        Log.d(TAG, "onMapReady: запущен on MapReady")
+
         if(mLocationPermissionGranted){
             getDeviceLocation()
 
             if(ActivityCompat.checkSelfPermission(mContext as Activity, FINE_LOCATION)
-            != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+                != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
                     mContext as Activity, COARSE_LOCATION)
-            != PackageManager.PERMISSION_GRANTED){
+                != PackageManager.PERMISSION_GRANTED){
                 return
             }
             mMap.isMyLocationEnabled = true
@@ -105,13 +107,14 @@ class FirstFragment : Fragment(), OnMapReadyCallback, InitializeHelperInterface 
             .findFragmentById(R.id.first_map) as? SupportMapFragment
 
         mapFragment?.getMapAsync(this)
+        Log.d(TAG, "initMap: запущен initMap")
     }
 
     private fun getLocationPermission(){
 
         val permissions = arrayOf(FINE_LOCATION, COARSE_LOCATION)
         if (ContextCompat.checkSelfPermission(activity!!, FINE_LOCATION) ==
-                PackageManager.PERMISSION_GRANTED) {
+            PackageManager.PERMISSION_GRANTED) {
             if (ContextCompat.checkSelfPermission(activity!!, COARSE_LOCATION) ==
                 PackageManager.PERMISSION_GRANTED
             ) {
@@ -126,12 +129,15 @@ class FirstFragment : Fragment(), OnMapReadyCallback, InitializeHelperInterface 
             }
         } else {
             ActivityCompat.requestPermissions(mContext as Activity, permissions,
-            LOCATION_PERMISSION_REQUEST_CODE)
+                LOCATION_PERMISSION_REQUEST_CODE)
         }
     }
 
     override fun getDeviceLocation(){
-        mFusedLocationProviderClient = getFusedLocationProviderClient(mContext as Activity)
+        mFusedLocationProviderClient =
+            LocationServices.getFusedLocationProviderClient(mContext as Activity)
+
+        Log.d(TAG, "getDeviceLocation: запущен getDeviceLocation")
 
         try {
             if(mLocationPermissionGranted){
@@ -139,8 +145,11 @@ class FirstFragment : Fragment(), OnMapReadyCallback, InitializeHelperInterface 
                 location.addOnCompleteListener(requireActivity()) { task ->
                     if (task.isSuccessful){
                         var currentLocation: Location = (task.result as Location?)!!
-                        moveCamera(LatLng(currentLocation.latitude, currentLocation.longitude),
-                        DEFAULT_ZOOM, "My location")
+                        Log.d(TAG, "getDeviceLocation: task is successful")
+                        moveCamera(
+                            LatLng(currentLocation.latitude, currentLocation.longitude),
+                            DEFAULT_ZOOM, "My location")
+                        Log.d(TAG, "getDeviceLocation: запущен moveCamera")
                     } else{
                         Toast.makeText(mContext, "unable to get current location",
                             Toast.LENGTH_SHORT).show()
@@ -153,8 +162,9 @@ class FirstFragment : Fragment(), OnMapReadyCallback, InitializeHelperInterface 
 
     override fun moveCamera(latLng: LatLng, zoom: Float, title: String){
 
+        Log.d(TAG, "moveCamera: title: $title")
+
         sendLatLngFromListener.onSendLatLngFrom(latLng)
-        Log.d(TAG, "moveCamera: Передача ${latLng.latitude} + ${latLng.longitude}")
 
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, zoom))
 
@@ -164,6 +174,8 @@ class FirstFragment : Fragment(), OnMapReadyCallback, InitializeHelperInterface 
                 .title(title)
             mMap.addMarker(options)
         }
+
+        Log.d(TAG, "moveCamera: title2: $title")
         hideSoftKeyboard()
     }
 

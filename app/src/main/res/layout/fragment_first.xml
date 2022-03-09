@@ -34,8 +34,7 @@
             android:id="@+id/from_input_search"
             android:background="@null"
             android:hint="Enter address, City or Zip code"
-            android:imeOptions="actionSearch"
-            android:completionThreshold="3"/>
+            android:imeOptions="actionSearch" />
     </RelativeLayout>
     <ImageView
         android:layout_width="40dp"
