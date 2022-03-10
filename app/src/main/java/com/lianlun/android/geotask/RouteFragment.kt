@@ -1,23 +1,29 @@
 package com.lianlun.android.geotask
 
+import android.Manifest
+import android.app.Activity
 import android.content.Context
+import android.content.pm.PackageManager
 import android.graphics.Color
+import android.location.Location
 import android.os.AsyncTask
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
-import com.google.android.gms.maps.model.JointType
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.LatLngBounds
-import com.google.android.gms.maps.model.PolylineOptions
+import com.google.android.gms.maps.model.*
+import com.google.android.gms.tasks.Task
 import com.lianlun.android.geotask.R.layout.fragment_route
 import kotlinx.coroutines.joinAll
 import org.json.JSONObject
@@ -35,10 +41,17 @@ class RouteFragment : Fragment(), OnMapReadyCallback {
     private var TAG: String = "RouteFragment"
     private lateinit var origin: LatLng
     private lateinit var destination: LatLng
+    private lateinit var myLocation: LatLng
     private lateinit var apiKey: String
     private lateinit var mContext: Context
+    private var mLocationPermissionGranted = false
     private lateinit var polylineList: List<LatLng>
     private lateinit var polylineOptions: PolylineOptions
+    private val FINE_LOCATION = Manifest.permission.ACCESS_FINE_LOCATION
+    private val COARSE_LOCATION = Manifest.permission.ACCESS_COARSE_LOCATION
+    private val LOCATION_PERMISSION_REQUEST_CODE = 1234
+    private lateinit var mFusedLocationProviderClient: FusedLocationProviderClient
+
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -58,11 +71,24 @@ class RouteFragment : Fragment(), OnMapReadyCallback {
 
         apiKey = mContext.getString(R.string.google_maps_key)
 
+        getLocationPermission()
+
         return view
     }
 
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
+
+        if(mLocationPermissionGranted){
+            getDeviceLocation()
+            if(ActivityCompat.checkSelfPermission(mContext as Activity, FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+                    mContext as Activity, COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED){
+                return
+            }
+            mMap.isMyLocationEnabled = true
+            mMap.uiSettings.isMyLocationButtonEnabled = false
+        }
     }
 
     fun setLatLng(origin: LatLng, destination: LatLng){
@@ -73,7 +99,51 @@ class RouteFragment : Fragment(), OnMapReadyCallback {
         val url: String = getDirectionsUrl(origin, destination)!!
         val downloadTask = DownloadTask()
         downloadTask.execute(url)
-//        builder()
+    }
+
+    private fun getLocationPermission(){
+
+        val permissions = arrayOf(FINE_LOCATION, COARSE_LOCATION)
+        if (ContextCompat.checkSelfPermission(activity!!, FINE_LOCATION) ==
+            PackageManager.PERMISSION_GRANTED) {
+            if (ContextCompat.checkSelfPermission(activity!!, COARSE_LOCATION) ==
+                PackageManager.PERMISSION_GRANTED
+            ) {
+                //Permission is granted
+                mLocationPermissionGranted = true
+            } else {
+                ActivityCompat.requestPermissions(
+                    mContext as Activity, permissions,
+                    LOCATION_PERMISSION_REQUEST_CODE
+                )
+            }
+        } else {
+            ActivityCompat.requestPermissions(mContext as Activity, permissions,
+                LOCATION_PERMISSION_REQUEST_CODE)
+        }
+    }
+
+    private fun getDeviceLocation(){
+        mFusedLocationProviderClient =
+            LocationServices.getFusedLocationProviderClient(mContext as Activity)
+
+        try {
+            if(mLocationPermissionGranted){
+                var location: Task<*> = mFusedLocationProviderClient.lastLocation
+                location.addOnCompleteListener(requireActivity()) { task ->
+                    if (task.isSuccessful){
+                        var currentLocation: Location = (task.result as Location?)!!
+//                        Log.d(TAG, "getDeviceLocation: task is successful")
+                        myLocation = LatLng(currentLocation.latitude, currentLocation.longitude)
+//                        Log.d(TAG, "getDeviceLocation: запущен moveCamera")
+                    } else{
+                        Toast.makeText(mContext, "unable to get current location",
+                            Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+        } catch (e: SecurityException){ }
+
     }
 
     @Throws(IOException::class)
@@ -122,47 +192,9 @@ class RouteFragment : Fragment(), OnMapReadyCallback {
         val builder = LatLngBounds.Builder()
         builder.include(origin)
         builder.include(destination)
+        builder.include(myLocation)
         mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(builder.build(), 100))
     }
-
-//    private fun decodePoly(encoded: String): List<LatLng>? {
-//        val poly: MutableList<LatLng> = ArrayList()
-//        var index = 0
-//        val len = encoded.length
-//        var lat = 0
-//        var lng = 0
-//        while (index < len) {
-//            var b = 0
-//            var shift = 0
-//            var result = 0
-//            do {
-//                if (index < len) {
-//                    b = encoded[index++].code - 63
-//                }
-//                result = result or (b and 0x1f shl shift)
-//                shift += 5
-//            } while (b >= 0x20)
-//            val dlat = if (result and 1 != 0) (result shr 1).inv() else result shr 1
-//            lat += dlat
-//            shift = 0
-//            result = 0
-//            do {
-//                if (index < len) {
-//                    b = encoded[index++].code - 63
-//                }
-//                result = result or (b and 0x1f shl shift)
-//                shift += 5
-//            } while (b >= 0x20)
-//            val dlng = if (result and 1 != 0) (result shr 1).inv() else result shr 1
-//            lng += dlng
-//            val p = LatLng(
-//                lat.toDouble() / 1E5,
-//                lng.toDouble() / 1E5
-//            )
-//            poly.add(p)
-//        }
-//        return poly
-//    }
 
     inner class DownloadTask: AsyncTask<String?, Void?, String?>(){
 
