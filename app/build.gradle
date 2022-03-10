@@ -3,7 +3,11 @@ plugins {
     id 'kotlin-android'
     id 'kotlin-android-extensions'
     id 'kotlin-kapt'
+    id 'com.google.secrets_gradle_plugin' version '0.4'
 }
+
+def localProperties = new Properties()
+localProperties.load(new FileInputStream(rootProject.file("local.properties")))
 
 android {
     compileSdk 32
@@ -19,6 +23,9 @@ android {
     }
 
     buildTypes {
+        debug {
+            resValue("string", "google_maps_key", localProperties['API_KEY'])
+        }
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'

@@ -1,5 +1,6 @@
 package com.lianlun.android.geotask
 
+import android.content.Context
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
@@ -23,6 +24,10 @@ class MapsActivity : AppCompatActivity(), OnSendLatLngListener{
 
         val pageAdapter: FragmentStateAdapter = TabHandler(this)
         viewpager?.adapter = pageAdapter
+
+        val apiKey = getString(R.string.google_maps_key)
+
+        Log.d(TAG, "onCreate: apiKey: $apiKey")
 
         val tabLayoutMediator = TabLayoutMediator(
             tabs, viewpager

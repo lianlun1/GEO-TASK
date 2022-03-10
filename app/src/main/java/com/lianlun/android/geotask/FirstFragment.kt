@@ -74,7 +74,7 @@ class FirstFragment : Fragment(), OnMapReadyCallback, InitializeHelperInterface 
             Places.initialize(mContext, apiKey)
         }
 
-        Log.d(TAG, "onCreateView: apiKey: $apiKey")
+//        Log.d(TAG, "onCreateView: apiKey: $apiKey")
 
         return view
     }
@@ -82,7 +82,7 @@ class FirstFragment : Fragment(), OnMapReadyCallback, InitializeHelperInterface 
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
 
-        Log.d(TAG, "onMapReady: запущен on MapReady")
+//        Log.d(TAG, "onMapReady: запущен on MapReady")
 
         if(mLocationPermissionGranted){
             getDeviceLocation()
@@ -107,7 +107,7 @@ class FirstFragment : Fragment(), OnMapReadyCallback, InitializeHelperInterface 
             .findFragmentById(R.id.first_map) as? SupportMapFragment
 
         mapFragment?.getMapAsync(this)
-        Log.d(TAG, "initMap: запущен initMap")
+//        Log.d(TAG, "initMap: запущен initMap")
     }
 
     private fun getLocationPermission(){
@@ -137,7 +137,7 @@ class FirstFragment : Fragment(), OnMapReadyCallback, InitializeHelperInterface 
         mFusedLocationProviderClient =
             LocationServices.getFusedLocationProviderClient(mContext as Activity)
 
-        Log.d(TAG, "getDeviceLocation: запущен getDeviceLocation")
+//        Log.d(TAG, "getDeviceLocation: запущен getDeviceLocation")
 
         try {
             if(mLocationPermissionGranted){
@@ -145,11 +145,11 @@ class FirstFragment : Fragment(), OnMapReadyCallback, InitializeHelperInterface 
                 location.addOnCompleteListener(requireActivity()) { task ->
                     if (task.isSuccessful){
                         var currentLocation: Location = (task.result as Location?)!!
-                        Log.d(TAG, "getDeviceLocation: task is successful")
+//                        Log.d(TAG, "getDeviceLocation: task is successful")
                         moveCamera(
                             LatLng(currentLocation.latitude, currentLocation.longitude),
                             DEFAULT_ZOOM, "My location")
-                        Log.d(TAG, "getDeviceLocation: запущен moveCamera")
+//                        Log.d(TAG, "getDeviceLocation: запущен moveCamera")
                     } else{
                         Toast.makeText(mContext, "unable to get current location",
                             Toast.LENGTH_SHORT).show()
@@ -162,7 +162,7 @@ class FirstFragment : Fragment(), OnMapReadyCallback, InitializeHelperInterface 
 
     override fun moveCamera(latLng: LatLng, zoom: Float, title: String){
 
-        Log.d(TAG, "moveCamera: title: $title")
+//        Log.d(TAG, "moveCamera: title: $title")
 
         sendLatLngFromListener.onSendLatLngFrom(latLng)
 
@@ -175,7 +175,7 @@ class FirstFragment : Fragment(), OnMapReadyCallback, InitializeHelperInterface 
             mMap.addMarker(options)
         }
 
-        Log.d(TAG, "moveCamera: title2: $title")
+//        Log.d(TAG, "moveCamera: title2: $title")
         hideSoftKeyboard()
     }
 
