@@ -132,7 +132,7 @@ class SecondFragment : Fragment(), OnMapReadyCallback, InitializeHelperInterface
         }
     }
 
-    override fun getDeviceLocation(){
+    private fun getDeviceLocation(){
         mFusedLocationProviderClient =
             LocationServices.getFusedLocationProviderClient(mContext as Activity)
 
@@ -155,10 +155,36 @@ class SecondFragment : Fragment(), OnMapReadyCallback, InitializeHelperInterface
 
     }
 
-    override fun moveCamera(latLng: LatLng, zoom: Float, title: String){
+    override fun getDeviceLocationGps(){
+        mFusedLocationProviderClient =
+            LocationServices.getFusedLocationProviderClient(mContext as Activity)
 
+        try {
+            if(mLocationPermissionGranted){
+                var location: Task<*> = mFusedLocationProviderClient.lastLocation
+                location.addOnCompleteListener(requireActivity()) { task ->
+                    if (task.isSuccessful){
+                        var currentLocation: Location = (task.result as Location?)!!
+
+                        setLatLng(LatLng(currentLocation.latitude, currentLocation.longitude))
+
+                        moveCamera(
+                            LatLng(currentLocation.latitude, currentLocation.longitude),
+                            DEFAULT_ZOOM, "My location")
+                    } else{
+                        Toast.makeText(mContext, "unable to get current location",
+                            Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+        } catch (e: SecurityException){ }
+    }
+
+    override fun setLatLng(latLng: LatLng) {
         sendLatLngToListener.onSendLatLngTo(latLng)
+    }
 
+    override fun moveCamera(latLng: LatLng, zoom: Float, title: String){
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, zoom))
 
         if(title != "My position"){

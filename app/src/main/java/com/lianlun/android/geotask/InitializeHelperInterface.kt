@@ -62,7 +62,7 @@ interface InitializeHelperInterface {
 
         gps.setOnClickListener(View.OnClickListener {
 //            Log.d("InitializeHelperInterface", "init: нажат gps")
-            getDeviceLocation()
+            getDeviceLocationGps()
         })
         hideSoftKeyboard()
     }
@@ -124,6 +124,8 @@ interface InitializeHelperInterface {
         if (list.isNotEmpty()){
             var address: Address = list[0]
 
+            setLatLng(LatLng(address.latitude, address.longitude))
+
             moveCamera(
                 LatLng(address.latitude, address.longitude), DEFAULT_ZOOM,
                 address.getAddressLine(0)
@@ -131,7 +133,9 @@ interface InitializeHelperInterface {
         }
     }
 
-    fun getDeviceLocation(){}
+    fun setLatLng(latLng: LatLng){}
+
+    fun getDeviceLocationGps(){}
 
     fun moveCamera(latLng: LatLng, zoom: Float, title: String){}
 

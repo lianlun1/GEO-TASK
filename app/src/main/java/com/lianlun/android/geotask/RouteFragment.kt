@@ -25,7 +25,6 @@ import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.*
 import com.google.android.gms.tasks.Task
 import com.lianlun.android.geotask.R.layout.fragment_route
-import kotlinx.coroutines.joinAll
 import org.json.JSONObject
 import java.io.BufferedReader
 import java.io.IOException
@@ -33,7 +32,6 @@ import java.io.InputStream
 import java.io.InputStreamReader
 import java.net.HttpURLConnection
 import java.net.URL
-import kotlin.math.ln
 
 class RouteFragment : Fragment(), OnMapReadyCallback {
 
@@ -91,10 +89,10 @@ class RouteFragment : Fragment(), OnMapReadyCallback {
         }
     }
 
-    fun setLatLng(origin: LatLng, destination: LatLng){
+    fun setLatLng(origin: LatLng?, destination: LatLng?){
         Log.d(TAG, "setLatLng: получение From: $origin, To: $destination")
-        this.origin = origin
-        this.destination = destination
+        this.origin = origin!!
+        this.destination = destination!!
 
         val url: String = getDirectionsUrl(origin, destination)!!
         val downloadTask = DownloadTask()

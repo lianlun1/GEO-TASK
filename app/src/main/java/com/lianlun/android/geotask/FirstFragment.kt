@@ -133,7 +133,7 @@ class FirstFragment : Fragment(), OnMapReadyCallback, InitializeHelperInterface 
         }
     }
 
-    override fun getDeviceLocation(){
+    private fun getDeviceLocation(){
         mFusedLocationProviderClient =
             LocationServices.getFusedLocationProviderClient(mContext as Activity)
 
@@ -157,14 +157,44 @@ class FirstFragment : Fragment(), OnMapReadyCallback, InitializeHelperInterface 
                 }
             }
         } catch (e: SecurityException){ }
+    }
 
+    override fun getDeviceLocationGps(){
+        mFusedLocationProviderClient =
+            LocationServices.getFusedLocationProviderClient(mContext as Activity)
+
+//        Log.d(TAG, "getDeviceLocation: запущен getDeviceLocation")
+
+        try {
+            if(mLocationPermissionGranted){
+                var location: Task<*> = mFusedLocationProviderClient.lastLocation
+                location.addOnCompleteListener(requireActivity()) { task ->
+                    if (task.isSuccessful){
+                        var currentLocation: Location = (task.result as Location?)!!
+//                        Log.d(TAG, "getDeviceLocation: task is successful")
+
+                        setLatLng(LatLng(currentLocation.latitude, currentLocation.longitude))
+
+                        moveCamera(
+                            LatLng(currentLocation.latitude, currentLocation.longitude),
+                            DEFAULT_ZOOM, "My location")
+//                        Log.d(TAG, "getDeviceLocation: запущен moveCamera")
+                    } else{
+                        Toast.makeText(mContext, "unable to get current location",
+                            Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+        } catch (e: SecurityException){ }
+    }
+
+    override fun setLatLng(latLng: LatLng) {
+        sendLatLngFromListener.onSendLatLngFrom(latLng)
     }
 
     override fun moveCamera(latLng: LatLng, zoom: Float, title: String){
 
 //        Log.d(TAG, "moveCamera: title: $title")
-
-        sendLatLngFromListener.onSendLatLngFrom(latLng)
 
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, zoom))
 

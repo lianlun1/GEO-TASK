@@ -1,10 +1,10 @@
 package com.lianlun.android.geotask
 
-import android.content.Context
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.widget.Toast
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.material.tabs.TabLayoutMediator
@@ -14,8 +14,8 @@ import kotlinx.android.synthetic.main.activity_maps.viewpager
 
 class MapsActivity : AppCompatActivity(), OnSendLatLngListener{
 
-    private lateinit var latLngFrom: LatLng
-    private lateinit var latLngTo: LatLng
+    private var latLngFrom: LatLng? = null
+    private var latLngTo: LatLng? = null
     private val TAG = "MapsActivity"
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -51,13 +51,22 @@ class MapsActivity : AppCompatActivity(), OnSendLatLngListener{
         this.latLngTo = latLng
     }
 
-
     private fun button() {
         route_button.setOnClickListener(View.OnClickListener {
-            setContentView(R.layout.activity_maps_route)
-            val fragment = supportFragmentManager.findFragmentById(R.id.routeFragment) as RouteFragment
-            fragment.setLatLng(latLngFrom, latLngTo)
-            Log.d(TAG, "button: From: $latLngFrom, To: $latLngTo")
+            when {
+                latLngFrom == null -> {
+                    Toast.makeText(this, "Выберите оба адреса", Toast.LENGTH_SHORT).show()
+                }
+                latLngTo == null -> {
+                    Toast.makeText(this, "Выберите оба адреса", Toast.LENGTH_SHORT).show()
+                }
+                else -> {
+                    setContentView(R.layout.activity_maps_route)
+                    val fragment = supportFragmentManager.findFragmentById(R.id.routeFragment) as RouteFragment
+                    fragment.setLatLng(latLngFrom, latLngTo)
+                    Log.d(TAG, "button: From: $latLngFrom, To: $latLngTo")
+                }
+            }
         })
     }
 }
