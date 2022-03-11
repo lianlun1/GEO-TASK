@@ -3,7 +3,6 @@ package com.lianlun.android.geotask
 import android.Manifest
 import android.app.Activity
 import android.content.Context
-import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Bundle
@@ -31,10 +30,6 @@ import kotlinx.android.synthetic.main.fragment_second.*
 import java.lang.ClassCastException
 
 class SecondFragment : Fragment(), OnMapReadyCallback, InitializeHelperInterface {
-
-//    interface OnSendLatLngToListener{
-//        fun onSendLatLngTo(latLng: LatLng)
-//    }
 
     private lateinit var sendLatLngToListener: OnSendLatLngListener
 
@@ -117,7 +112,6 @@ class SecondFragment : Fragment(), OnMapReadyCallback, InitializeHelperInterface
             if (ContextCompat.checkSelfPermission(activity!!, COARSE_LOCATION) ==
                 PackageManager.PERMISSION_GRANTED
             ) {
-                //Permission is granted
                 mLocationPermissionGranted = true
                 initMap()
             } else {

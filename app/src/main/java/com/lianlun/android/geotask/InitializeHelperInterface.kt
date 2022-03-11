@@ -6,7 +6,6 @@ import android.location.Geocoder
 import android.text.Editable
 import android.text.SpannableString
 import android.text.TextWatcher
-import android.util.Log
 import android.view.KeyEvent
 import android.view.View
 import android.view.inputmethod.EditorInfo
@@ -34,14 +33,11 @@ interface InitializeHelperInterface {
              gps: ImageView,
              DEFAULT_ZOOM: Float){
 
-//        Log.d("InitializeHelperInterface", "init: запущен init")
-
         placesClient = Places.createClient(context)
 
         autoCompleteTextView.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable) {
                     autocompleteHelper(autoCompleteTextView, context, DEFAULT_ZOOM)
-//                Log.d("InitializeHelperInterface", "afterTextChanged: s: $s")
             }
 
             override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
@@ -55,13 +51,11 @@ interface InitializeHelperInterface {
                 || keyEvent.action == KeyEvent.KEYCODE_ENTER
             ) {
                 geoLocate(autoCompleteTextView, context, DEFAULT_ZOOM)
-//                Log.d("InitializeHelperInterface", "init: autoCompleteTextView.setOnEditorActionListener")
             }
             false
         })
 
         gps.setOnClickListener(View.OnClickListener {
-//            Log.d("InitializeHelperInterface", "init: нажат gps")
             getDeviceLocationGps()
         })
         hideSoftKeyboard()
@@ -72,7 +66,6 @@ interface InitializeHelperInterface {
         context: Context,
         DEFAULT_ZOOM: Float
     ){
-//        Log.d("InitializeHelperInterface", "autocompleteHelper: запущен autocompleteHelper")
         var places = emptyArray<SpannableString>()
 
         var token: AutocompleteSessionToken = AutocompleteSessionToken.newInstance()
@@ -97,11 +90,9 @@ interface InitializeHelperInterface {
                                                                                              _,
                                                                                              position,
                                                                                              id ->
-//                    val selectedItem = parent.getItemAtPosition(position) as SpannableString
                     geoLocate(autoCompleteTextView, context, DEFAULT_ZOOM)
                 }
 
-//                geoLocate(autoCompleteTextView, context, DEFAULT_ZOOM)
             }.addOnFailureListener {exception: Exception? ->
                 if (exception is ApiException){ }
             }
@@ -112,7 +103,6 @@ interface InitializeHelperInterface {
         context: Context,
         DEFAULT_ZOOM: Float
     ){
-//        Log.d("InitializeHelperInterface", "geoLocate: запущен geoLocate")
 
         var searchString = autoCompleteTextView.text.toString()
 

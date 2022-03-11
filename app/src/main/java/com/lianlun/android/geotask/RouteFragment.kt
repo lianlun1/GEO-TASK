@@ -8,7 +8,6 @@ import android.graphics.Color
 import android.location.Location
 import android.os.AsyncTask
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -36,15 +35,12 @@ import java.net.URL
 class RouteFragment : Fragment(), OnMapReadyCallback {
 
     private lateinit var mMap: GoogleMap
-    private var TAG: String = "RouteFragment"
     private lateinit var origin: LatLng
     private lateinit var destination: LatLng
     private lateinit var myLocation: LatLng
     private lateinit var apiKey: String
     private lateinit var mContext: Context
     private var mLocationPermissionGranted = false
-    private lateinit var polylineList: List<LatLng>
-    private lateinit var polylineOptions: PolylineOptions
     private val FINE_LOCATION = Manifest.permission.ACCESS_FINE_LOCATION
     private val COARSE_LOCATION = Manifest.permission.ACCESS_COARSE_LOCATION
     private val LOCATION_PERMISSION_REQUEST_CODE = 1234
@@ -90,7 +86,6 @@ class RouteFragment : Fragment(), OnMapReadyCallback {
     }
 
     fun setLatLng(origin: LatLng?, destination: LatLng?){
-        Log.d(TAG, "setLatLng: получение From: $origin, To: $destination")
         this.origin = origin!!
         this.destination = destination!!
 
@@ -107,7 +102,6 @@ class RouteFragment : Fragment(), OnMapReadyCallback {
             if (ContextCompat.checkSelfPermission(activity!!, COARSE_LOCATION) ==
                 PackageManager.PERMISSION_GRANTED
             ) {
-                //Permission is granted
                 mLocationPermissionGranted = true
             } else {
                 ActivityCompat.requestPermissions(
@@ -131,9 +125,7 @@ class RouteFragment : Fragment(), OnMapReadyCallback {
                 location.addOnCompleteListener(requireActivity()) { task ->
                     if (task.isSuccessful){
                         var currentLocation: Location = (task.result as Location?)!!
-//                        Log.d(TAG, "getDeviceLocation: task is successful")
                         myLocation = LatLng(currentLocation.latitude, currentLocation.longitude)
-//                        Log.d(TAG, "getDeviceLocation: запущен moveCamera")
                     } else{
                         Toast.makeText(mContext, "unable to get current location",
                             Toast.LENGTH_SHORT).show()
@@ -163,12 +155,10 @@ class RouteFragment : Fragment(), OnMapReadyCallback {
             data = sb.toString()
             br.close()
         }catch (e: java.lang.Exception){
-            Log.d(TAG, "downloadUrl: ${e.toString()}")
         }finally {
             iStream!!.close()
             urlConnection!!.disconnect()
         }
-        Log.d(TAG, "downloadUrl: data: $data")
         return data
     }
 
@@ -182,7 +172,6 @@ class RouteFragment : Fragment(), OnMapReadyCallback {
         val parameters = "$str_origin&$str_dest&$key"
         val output = "json"
         val url = "https://maps.googleapis.com/maps/api/directions/$output?$parameters"
-        Log.d(TAG, "getDirectionsUrl: url: $url")
         return url
     }
 
@@ -200,16 +189,13 @@ class RouteFragment : Fragment(), OnMapReadyCallback {
             super.onPostExecute(result)
             val parserTask = ParserTask()
             parserTask.execute(result)
-            Log.d(TAG, "onPostExecute: result: $result")
         }
 
         override fun doInBackground(vararg url: String?): String? {
             var data = ""
             try{
                 data = downloadUrl(url[0].toString()).toString()
-                Log.d(TAG, "doInBackground: url: ${url[0]}")
             }catch (e: Exception){}
-            Log.d(TAG, "doInBackground: data: $data")
             return data
         }
     }
@@ -225,7 +211,6 @@ class RouteFragment : Fragment(), OnMapReadyCallback {
             }catch (e: java.lang.Exception){
                 e.printStackTrace()
             }
-            Log.d(TAG, "doInBackground: routes: $routes")
             return routes
         }
 
@@ -239,7 +224,6 @@ class RouteFragment : Fragment(), OnMapReadyCallback {
                     val lat = point["lat"]!!.toDouble()
                     val lng = point["lng"]!!.toDouble()
                     val position = LatLng(lat, lng)
-                    Log.d(TAG, "onPostExecute: positions: $position")
                     points.add(position)
                 }
                 lineOptions.addAll(points)

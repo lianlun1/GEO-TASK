@@ -2,7 +2,6 @@ package com.lianlun.android.geotask
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.viewpager2.adapter.FragmentStateAdapter
@@ -16,7 +15,6 @@ class MapsActivity : AppCompatActivity(), OnSendLatLngListener{
 
     private var latLngFrom: LatLng? = null
     private var latLngTo: LatLng? = null
-    private val TAG = "MapsActivity"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -26,8 +24,6 @@ class MapsActivity : AppCompatActivity(), OnSendLatLngListener{
         viewpager?.adapter = pageAdapter
 
         val apiKey = getString(R.string.google_maps_key)
-
-        Log.d(TAG, "onCreate: apiKey: $apiKey")
 
         val tabLayoutMediator = TabLayoutMediator(
             tabs, viewpager
@@ -64,7 +60,6 @@ class MapsActivity : AppCompatActivity(), OnSendLatLngListener{
                     setContentView(R.layout.activity_maps_route)
                     val fragment = supportFragmentManager.findFragmentById(R.id.routeFragment) as RouteFragment
                     fragment.setLatLng(latLngFrom, latLngTo)
-                    Log.d(TAG, "button: From: $latLngFrom, To: $latLngTo")
                 }
             }
         })
