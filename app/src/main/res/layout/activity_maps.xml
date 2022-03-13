@@ -14,8 +14,7 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         android:src="@drawable/ic_route"
-        android:scaleType="centerCrop"
-        android:alpha="0.4"/>
+        android:scaleType="centerCrop" />
     <com.google.android.material.tabs.TabLayout
         android:id="@+id/tabs"
         android:layout_width="350dp"

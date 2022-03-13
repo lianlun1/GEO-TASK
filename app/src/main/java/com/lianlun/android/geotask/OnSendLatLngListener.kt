@@ -4,7 +4,7 @@ import com.google.android.gms.maps.model.LatLng
 
 interface OnSendLatLngListener {
 
-    fun onSendLatLngFrom(latLng: LatLng){}
+    fun onSendLatLngOrigin(latLng: LatLng){}
 
-    fun onSendLatLngTo(latLng: LatLng)
+    fun onSendLatLngDestination(latLng: LatLng)
 }

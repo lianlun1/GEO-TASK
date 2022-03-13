@@ -13,8 +13,8 @@ import kotlinx.android.synthetic.main.activity_maps.viewpager
 
 class MapsActivity : AppCompatActivity(), OnSendLatLngListener{
 
-    private var latLngFrom: LatLng? = null
-    private var latLngTo: LatLng? = null
+    private var origin: LatLng? = null
+    private var destination: LatLng? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,27 +39,27 @@ class MapsActivity : AppCompatActivity(), OnSendLatLngListener{
     }
 
 
-    override fun onSendLatLngFrom(latLng: LatLng) {
-        this.latLngFrom = latLng
+    override fun onSendLatLngOrigin(latLng: LatLng) {
+        this.origin = latLng
     }
 
-    override fun onSendLatLngTo(latLng: LatLng) {
-        this.latLngTo = latLng
+    override fun onSendLatLngDestination(latLng: LatLng) {
+        this.destination = latLng
     }
 
     private fun button() {
         route_button.setOnClickListener(View.OnClickListener {
             when {
-                latLngFrom == null -> {
+                origin == null -> {
                     Toast.makeText(this, "Выберите оба адреса", Toast.LENGTH_SHORT).show()
                 }
-                latLngTo == null -> {
+                destination == null -> {
                     Toast.makeText(this, "Выберите оба адреса", Toast.LENGTH_SHORT).show()
                 }
                 else -> {
                     setContentView(R.layout.activity_maps_route)
                     val fragment = supportFragmentManager.findFragmentById(R.id.routeFragment) as RouteFragment
-                    fragment.setLatLng(latLngFrom, latLngTo)
+                    fragment.setLatLng(origin, destination)
                 }
             }
         })

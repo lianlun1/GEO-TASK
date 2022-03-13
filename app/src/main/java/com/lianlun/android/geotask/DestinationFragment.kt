@@ -6,9 +6,13 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Bundle
-import android.view.*
 import androidx.fragment.app.Fragment
-import android.widget.*
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.view.WindowManager
+import android.widget.ImageView
+import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -20,15 +24,14 @@ import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.gms.tasks.Task
-import com.lianlun.android.geotask.R.layout.fragment_first
-import kotlinx.android.synthetic.main.fragment_first.*
 import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.api.net.PlacesClient
+import kotlinx.android.synthetic.main.fragment_destination.*
 import java.lang.ClassCastException
 
-class FirstFragment : Fragment(), OnMapReadyCallback, InitializeHelperInterface {
+class DestinationFragment : Fragment(), OnMapReadyCallback, InitializeHelperInterface {
 
-    private lateinit var sendLatLngFromListener: OnSendLatLngListener
+    private lateinit var sendLatLngDestinationListener: OnSendLatLngListener
 
     private lateinit var mMap: GoogleMap
 
@@ -41,13 +44,14 @@ class FirstFragment : Fragment(), OnMapReadyCallback, InitializeHelperInterface 
     private val DEFAULT_ZOOM = 15f
     private var mLocationPermissionGranted = false
     override lateinit var placesClient: PlacesClient
+    private lateinit var mRoute: ImageView
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
         mContext = context
 
         try {
-            sendLatLngFromListener = context as OnSendLatLngListener
+            sendLatLngDestinationListener = context as OnSendLatLngListener
         } catch (e: ClassCastException){
             throw ClassCastException(
                 "$context должен реализовывать интерфейс OnSendLatLngToListener")
@@ -59,7 +63,7 @@ class FirstFragment : Fragment(), OnMapReadyCallback, InitializeHelperInterface 
         savedInstanceState: Bundle?
     ): View? {
 
-        val view = inflater.inflate(fragment_first, container, false)
+        val view = inflater.inflate(R.layout.fragment_destination, container, false)
 
         getLocationPermission()
 
@@ -68,6 +72,7 @@ class FirstFragment : Fragment(), OnMapReadyCallback, InitializeHelperInterface 
         if (!Places.isInitialized()){
             Places.initialize(mContext, apiKey)
         }
+
         return view
     }
 
@@ -88,13 +93,13 @@ class FirstFragment : Fragment(), OnMapReadyCallback, InitializeHelperInterface 
 
             placesClient = Places.createClient(mContext)
 
-            init(from_input_search, mContext, ic1_gps, DEFAULT_ZOOM)
+            init(to_input_search, mContext, ic2_gps, DEFAULT_ZOOM)
         }
     }
 
     private fun initMap(){
         val mapFragment = childFragmentManager
-            .findFragmentById(R.id.first_map) as? SupportMapFragment
+            .findFragmentById(R.id.second_map) as? SupportMapFragment
 
         mapFragment?.getMapAsync(this)
     }
@@ -124,17 +129,16 @@ class FirstFragment : Fragment(), OnMapReadyCallback, InitializeHelperInterface 
     private fun getDeviceLocation(){
         mFusedLocationProviderClient =
             LocationServices.getFusedLocationProviderClient(mContext as Activity)
+
         try {
             if(mLocationPermissionGranted){
                 var location: Task<*> = mFusedLocationProviderClient.lastLocation
                 location.addOnCompleteListener(requireActivity()) { task ->
                     if (task.isSuccessful){
                         var currentLocation: Location = (task.result as Location?)!!
-//                        Log.d(TAG, "getDeviceLocation: task is successful")
                         moveCamera(
                             LatLng(currentLocation.latitude, currentLocation.longitude),
                             DEFAULT_ZOOM, "My location")
-//                        Log.d(TAG, "getDeviceLocation: запущен moveCamera")
                     } else{
                         Toast.makeText(mContext, "unable to get current location",
                             Toast.LENGTH_SHORT).show()
@@ -142,11 +146,13 @@ class FirstFragment : Fragment(), OnMapReadyCallback, InitializeHelperInterface 
                 }
             }
         } catch (e: SecurityException){ }
+
     }
 
     override fun getDeviceLocationGps(){
         mFusedLocationProviderClient =
             LocationServices.getFusedLocationProviderClient(mContext as Activity)
+
         try {
             if(mLocationPermissionGranted){
                 var location: Task<*> = mFusedLocationProviderClient.lastLocation
@@ -169,11 +175,10 @@ class FirstFragment : Fragment(), OnMapReadyCallback, InitializeHelperInterface 
     }
 
     override fun setLatLng(latLng: LatLng) {
-        sendLatLngFromListener.onSendLatLngFrom(latLng)
+        sendLatLngDestinationListener.onSendLatLngDestination(latLng)
     }
 
     override fun moveCamera(latLng: LatLng, zoom: Float, title: String){
-
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, zoom))
 
         if(title != "My position"){
@@ -216,4 +221,3 @@ class FirstFragment : Fragment(), OnMapReadyCallback, InitializeHelperInterface 
             WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN)
     }
 }
-
