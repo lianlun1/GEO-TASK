@@ -1,6 +1,7 @@
 package com.lianlun.android.geotask
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.pm.PackageManager
@@ -24,6 +25,7 @@ import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.*
 import com.google.android.gms.tasks.Task
 import com.lianlun.android.geotask.R.layout.fragment_route
+import kotlinx.android.synthetic.main.fragment_route.*
 import org.json.JSONObject
 import java.io.BufferedReader
 import java.io.IOException
@@ -214,6 +216,7 @@ class RouteFragment : Fragment(), OnMapReadyCallback {
             return routes
         }
 
+        @SuppressLint("SetTextI18n")
         override fun onPostExecute(result: List<List<HashMap<String, String>>>?) {
             val points = ArrayList<LatLng?>()
             val lineOptions = PolylineOptions()
@@ -231,8 +234,13 @@ class RouteFragment : Fragment(), OnMapReadyCallback {
                 lineOptions.color(Color.BLACK)
                 lineOptions.geodesic(true)
             }
-            if (points.size != 0) mMap.addPolyline(lineOptions)
-            builder()
+            if (points.size != 0) {
+                route_text.text = "Found"
+                mMap.addPolyline(lineOptions)
+                builder()
+            } else{
+                route_text.text = "Unknown"
+            }
         }
     }
 }

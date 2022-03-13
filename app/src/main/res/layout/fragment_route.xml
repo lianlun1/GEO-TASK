@@ -7,4 +7,19 @@
         android:layout_height="match_parent"
         android:id="@+id/route_map"
         android:name="com.google.android.gms.maps.SupportMapFragment" />
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginLeft="10dp"
+        android:elevation="10dp"
+        android:id="@+id/relLayout1">
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:textAlignment="center"
+            android:textSize="25sp"
+            android:id="@+id/route_text"/>
+    </RelativeLayout>
 </RelativeLayout>
