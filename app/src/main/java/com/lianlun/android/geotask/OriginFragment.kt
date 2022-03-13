@@ -121,6 +121,7 @@ class OriginFragment : Fragment(), OnMapReadyCallback, InitializeHelperInterface
         }
     }
 
+    //Getting the location of the device when loading a fragment
     private fun getDeviceLocation(){
         mFusedLocationProviderClient =
             LocationServices.getFusedLocationProviderClient(mContext as Activity)
@@ -144,6 +145,7 @@ class OriginFragment : Fragment(), OnMapReadyCallback, InitializeHelperInterface
         } catch (e: SecurityException){ }
     }
 
+    //Getting device location by gps button
     override fun getDeviceLocationGps(){
         mFusedLocationProviderClient =
             LocationServices.getFusedLocationProviderClient(mContext as Activity)
